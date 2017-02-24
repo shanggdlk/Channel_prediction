@@ -115,12 +115,12 @@ function globals_init
     ITERATION = 999;
     N = 1;
     DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
-    DOMAIN_TAU.length = (DOMAIN_TAU.end - DOMAIN_TAU.start) ...
-        / DOMAIN_TAU.step + 1;
+    DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
+        / DOMAIN_TAU.step + 1);
     
     DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/10); % unit: radius
-    DOMAIN_PHI.length = (DOMAIN_PHI.end - DOMAIN_PHI.start) ...
-        / DOMAIN_PHI.step + 1;
+    DOMAIN_PHI.length = round((DOMAIN_PHI.end - DOMAIN_PHI.start) ...
+        / DOMAIN_PHI.step + 1);
     
     %% simulation
     global SIMULATION_TAU SIMULATION_PHI
