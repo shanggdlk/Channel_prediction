@@ -44,7 +44,7 @@ function ret_tau = opt_tau(phi, X)
 
 global DOMAIN_TAU L
 
-tau_space = zeros(n_phi, L);
+tau_space = zeros(DOMAIN_TAU.length, L);
 for i = 1:DOMAIN_TAU.length
     tau_space(i,:) = compute_Z(zeros(1, L)+DOMAIN_TAU.step*(i-1)...
         +DOMAIN_TAU.start, phi, X);
@@ -59,7 +59,7 @@ function ret_phi = opt_phi(tau, X)
 
 global DOMAIN_PHI L
 
-phi_space = zeros(n_tau, L);
+phi_space = zeros(DOMAIN_PHI.length, L);
 for i = 1:DOMAIN_PHI.length
     phi_space(i,:) = compute_Z(tau, zeros(1, L)+DOMAIN_PHI.step*(i-1)...
         +DOMAIN_PHI.start, X);
@@ -90,7 +90,7 @@ function globals_init
     % D is spacing between adjacent antennas of the receiver antenna array;
     % N: # of sample
     global FREQUENCY SPEED_OF_LIGHT LAMBDA M L D ITERATION N DOMAIN_TAU ...
-        DOMAIN_PHI DOMAIN_ALPHA
+        DOMAIN_PHI
     FREQUENCY = 5.2e9;  %unit hz
     SPEED_OF_LIGHT = 3e8;  %unit m/s
     LAMBDA = SPEED_OF_LIGHT/FREQUENCY;
@@ -100,11 +100,11 @@ function globals_init
     ITERATION = 999;
     N = 1;
     DOMAIN_TAU = struct('start', 10, 'end', 30, 'step', 1); % unit: ns
-    DOMATN_TAU.length = (DOMAIN_TAU.end - DOMAIN_TAU.start) ...
+    DOMAIN_TAU.length = (DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1;
     
     DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/10); % unit: radius
-    DOMATN_PHI.length = (DOMAIN_PHI.end - DOMAIN_PHI.start) ...
+    DOMAIN_PHI.length = (DOMAIN_PHI.end - DOMAIN_PHI.start) ...
         / DOMAIN_PHI.step + 1;
     
     
