@@ -80,13 +80,11 @@ ret_alpha = 1/(M*N)*abs(compute_Z(tau, phi, X));
 end
 
 
-function csi_sample = generate_simulation()
-    global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
+function generate_simulation()
+    global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M L
     C = compute_C(SIMULATION_PHI);
     ALPHA = 1./(SPEED_OF_LIGHT*SIMULATION_TAU);
-    csi_sample = repmat(ALPHA, M, 1) .* C .* ...
-        repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
-    csi_sample = sum(csi_sample, 2);
+    csi_sample = repmat(ALPHA, M, L) .* C .* repmat(, );
     
     
 
@@ -123,7 +121,7 @@ function globals_init
         / DOMAIN_PHI.step + 1;
     
     %% simulation
-    global SIMULATION_TAU SIMULATION_PHI
+    global SIMULATION_TAU SIMULATION_PHI SIMULATION_ALPHA
     SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
     SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
    
