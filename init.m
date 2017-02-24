@@ -1,18 +1,25 @@
-function [parameter] = init(freq,lambda,d,M,L,csi)
+function [parameter] = init(csi, parameter)
 
-% f: frequency;
-% lambda: wavelength;
-% d: spacing between adjacent antennas;
-% M: antenna array size;
-% L: L path;
-N = 1;
+global N L M FREQUENCY
 
-% theta stores L (amplitude, angle, delay);
-theta = zeros(L,3);
+% X: M*L
 
-X = eStep(theta,freq, L, M, csi, lambda,d);
-% X: MxL;
-parameter = zeros(L,3);
+X = eStep(parameter,csi);
+
+start_tau = 10; end_tau = 30;step_tau = 1;
+n_tau = (end_tau - start_tau) / step_tau + 1;
+
+space = repmat(X, 1, n_tau);
+
+var = reshape(repmat(start_tau:step_tau:end_tau, L*M, 1), [M, n_tau*L]);
+
+space = space .* exp(-1j*2*pi*FREQUENCY*var);
+
+opt_tau = transpose(reshape(sum(space, 1), [L, n_tau]));
+
+[~, I] = max(opt_tau);
+
+parameter.tau = step_tau*(I-1)+start_tau;
 
 for a = 1:L
 
