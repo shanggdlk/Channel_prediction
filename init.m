@@ -1,37 +1,35 @@
 function [parameter] = init(csi, parameter)
 
-global N L M FREQUENCY
+global N L M FREQUENCY DOMAIN_TAU DOMAIN_PHI
 
 
 %% init tau
-X = eStep(parameter,csi);
+X = eStep(parameter, csi);
 
-start_tau = 10; end_tau = 30;step_tau = 1;  % unit: ns
-n_tau = (end_tau - start_tau) / step_tau + 1;
+tau_space = repmat(X, 1, DOMAIN_TAU.length);
 
-tau_space = repmat(X, 1, n_tau);
-
-var = reshape(repmat(start_tau:step_tau:end_tau, L*M, 1), [M, n_tau*L]);
+var = reshape(repmat(DOMAIN_TAU.start:DOMAIN_TAU.step:DOMAIN_TAU.end, ...
+    L*M, 1), [M, DOMAIN_TAU.length*L]);
 
 tau_space = abs(tau_space .* exp(-1j*2*pi*FREQUENCY*var));
 
-opt_tau = transpose(reshape(sum(tau_space, 1), [L, n_tau]));
+opt_tau = transpose(reshape(sum(tau_space, 1), [L, DOMAIN_TAU.length]));
 
 [~, I] = max(opt_tau);
 
-parameter.tau = step_tau*(I-1)+start_tau;
+parameter.tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
 
 %% init phi
-start_phi = 0; end_phi = pi; step_phi = pi/10;  % unit: radius
-n_phi = (end_phi - start_phi) / step_phi + 1;
+DOMAIN_PHI.start = 0; DOMAIN_PHI.end = pi; DOMAIN_PHI.step = pi/10;  
+DOMAIN_PHI.length = (DOMAIN_PHI.end - DOMAIN_PHI.start) / DOMAIN_PHI.step + 1;
 
-phi_space = zeros(n_phi, L);
-for i = 1:n_phi
+phi_space = zeros(DOMAIN_PHI.length, L);
+for i = 1:DOMAIN_PHI.length
     phi_space(i,:) = compute_Z(parameter.tau,... 
-        zeros(1, L)+step_phi*(i-1)+start_phi, X);
+        zeros(1, L)+DOMAIN_PHI.step*(i-1)+DOMAIN_PHI.start, X);
 end
 [~, I] = max(abs(phi_space));
-parameter.phi = step_phi*(I-1)+start_phi;
+parameter.phi = DOMAIN_PHI.step*(I-1)+DOMAIN_PHI.start;
 
 
 %% init alpha
