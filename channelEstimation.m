@@ -32,7 +32,7 @@ for i = 1:ITERATION
     
     % Maximization step (M-step)
     parameters{i+1}.tau = opt_tau(parameters{i}.phi, X);
-    parameters{i+1}.phi = opt_phi(parameters{i+1}.tau);
+    parameters{i+1}.phi = opt_phi(parameters{i+1}.tau, X);
     parameters{i+1}.alpha = compute_alpha(parameters{i+1}.tau,... 
         parameters{i+1}.phi, X);
 end
@@ -40,19 +40,40 @@ end
 ret_parameter = parameters{ITERATION+1};
 end
 
-function ret = opt_tau(phi, X)
-start_phi = 0; end_phi = pi; step_phi = pi/10;  % unit: radius
-n_phi = (end_phi - start_phi) / step_phi + 1;
+function ret_tau = opt_tau(phi, X)
 
-phi_space = zeros(n_phi, L);
-for i = 1:n_phi
-    phi_space(i,:) = compute_Z(parameter.tau,... 
-        zeros(1, L)+step_phi*(i-1)+start_phi, X);
+global DOMAIN_TAU L
+
+tau_space = zeros(n_phi, L);
+for i = 1:DOMAIN_TAU.length
+    tau_space(i,:) = compute_Z(zeros(1, L)+DOMAIN_TAU.step*(i-1)...
+        +DOMAIN_TAU.start, phi, X);
+end
+[~, I] = max(abs(tau_space));
+ret_tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
+
+end
+
+
+function ret_phi = opt_phi(tau, X)
+
+global DOMAIN_PHI L
+
+phi_space = zeros(n_tau, L);
+for i = 1:DOMAIN_PHI.length
+    phi_space(i,:) = compute_Z(tau, zeros(1, L)+DOMAIN_PHI.step*(i-1)...
+        +DOMAIN_PHI.start, X);
 end
 [~, I] = max(abs(phi_space));
-parameter.phi = step_phi*(I-1)+start_phi;
+ret_phi = DOMAIN_PHI.step*(I-1)+DOMAIN_PHI.start;
 
+end
 
+function ret_alpha = compute_alpha(tau, phi, X)
+
+global M N 
+
+ret_alpha = 1/(M*N)*abs(compute_Z(tau, phi, X));
 
 end
 
