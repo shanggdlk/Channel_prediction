@@ -2,28 +2,36 @@ function [parameter] = init(csi, parameter)
 
 global N L M FREQUENCY
 
-% X: M*L
 
-% X = eStep(parameter,csi);
+%% init tau
+X = eStep(parameter,csi);
 
-start_tau = 10; end_tau = 30; step_tau = 1;
+start_tau = 10; end_tau = 30;step_tau = 1;  % unit: ns
 n_tau = (end_tau - start_tau) / step_tau + 1;
-space = zeros(M, L*n_tau);
-for i = 1:n_tau
-    parameter.tau = step_tau*(i-1)+start_tau;
-    space(1:M, L*(i-1)+1:L*i) = eStep(parameter, csi);
-end
+
+tau_space = repmat(X, 1, n_tau);
 
 var = reshape(repmat(start_tau:step_tau:end_tau, L*M, 1), [M, n_tau*L]);
 
-space = space .* exp(-1j*2*pi*FREQUENCY*var);
+tau_space = abs(tau_space .* exp(-1j*2*pi*FREQUENCY*var));
 
-opt_tau = transpose(reshape(sum(space, 1), [L, n_tau]));
+opt_tau = transpose(reshape(sum(tau_space, 1), [L, n_tau]));
 
 [~, I] = max(opt_tau);
 
 parameter.tau = step_tau*(I-1)+start_tau;
 
+%% init phi
+start_phi = 0; end_phi = pi; step_phi = pi/10;  % unit: radius
+n_phi = (end_phi - start_phi) / step_phi + 1;
+
+phi_space = z(parameter.tau, start_phi:step_phi:end_phi, X);
+[~, I] = max(abs(phi_space));
+parameter.phi = step_phi*(I-1)+start_phi;
+
+
+%% init alpha
+alpha = 1/(M*N)*z()
 
 
 for a = 1:L

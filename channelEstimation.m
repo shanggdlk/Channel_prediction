@@ -25,10 +25,10 @@ parameters{1} = init(csi_sample, parameters{1});
 
 
 % Iterating 1000 times;
-for a = 1:iteration
+for i = 2:ITERATION+1
     
     % Expectation step (E-step)
-    X = eStep(parameter{a},freq, L, M, csi_sample, lambda,d);
+    X = eStep(parameters{i});
     
     % Maximization step (M-step)
     theta_next = mStep (X, freq, L, M, lambda,d);
