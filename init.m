@@ -30,6 +30,6 @@ parameter.phi = DOMAIN_PHI.step*(I-1)+DOMAIN_PHI.start;
 
 
 %% init alpha
-parameter.alpha = 1/(M*N)*abs(compute_Z(parameter.tau, parameter.phi, X));
+parameter.alpha = 1/(M*N)*compute_Z(parameter.tau, parameter.phi, X);
         
 end
