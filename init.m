@@ -20,9 +20,6 @@ opt_tau = transpose(reshape(sum(tau_space, 1), [L, DOMAIN_TAU.length]));
 parameter.tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
 
 %% init phi
-DOMAIN_PHI.start = 0; DOMAIN_PHI.end = pi; DOMAIN_PHI.step = pi/10;  
-DOMAIN_PHI.length = (DOMAIN_PHI.end - DOMAIN_PHI.start) / DOMAIN_PHI.step + 1;
-
 phi_space = zeros(DOMAIN_PHI.length, L);
 for i = 1:DOMAIN_PHI.length
     phi_space(i,:) = compute_Z(parameter.tau,... 

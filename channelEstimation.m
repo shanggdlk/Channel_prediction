@@ -111,14 +111,14 @@ function globals_init
     LAMBDA = SPEED_OF_LIGHT/FREQUENCY;
     M = 3;
     L = 8;
-    D = 12;
+    D = LAMBDA/2;
     ITERATION = 999;
     N = 1;
-    DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
+    DOMAIN_TAU = struct('start', 5e-9, 'end', 35e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);
     
-    DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/10); % unit: radius
+    DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/30); % unit: radius
     DOMAIN_PHI.length = round((DOMAIN_PHI.end - DOMAIN_PHI.start) ...
         / DOMAIN_PHI.step + 1);
     
