@@ -23,9 +23,10 @@ for i = 1:ITERATION+1
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
 
-parameters{1} = init(csi_sample, parameters{1});
+parameters{1} = init1(csi_sample, parameters{1});
 
-
+% debug
+tmps = zeros(ITERATION,  L);
 %% Iterating;
 for i = 1:ITERATION
     
@@ -37,6 +38,11 @@ for i = 1:ITERATION
     parameters{i+1}.phi = opt_phi(parameters{i+1}.tau, X);
     parameters{i+1}.alpha = compute_alpha(parameters{i+1}.tau,... 
         parameters{i+1}.phi, X);
+    
+    %debug
+%     disp(parameters{i+1}.alpha);
+%     tmp_alphas(i) = parameters{i+1}.alpha(1);
+    tmps(i, :) = abs(compute_Z(parameters{i+1}.tau, parameters{i+1}.phi, X));
 end
 
 ret_parameter = parameters{ITERATION+1};
