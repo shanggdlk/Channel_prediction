@@ -1,9 +1,11 @@
-function [ret_parameter] = channelEstimation(csi_sample)
+function [parameters,ret_parameter] = channelEstimation(csi_sample)
 %% csi_sample: M*1 complex
 % theta is a L*3 vector: [alpha, phi, tau] 
 % [alpha, -, -]_l: the amplitude of the path l;
 % [-, phi, -]_l: the azimuth angle of the path l;
 % [-, -, tau]_l: the delay of the path l;
+
+global M LAMBDA D FREQUENCY;
 
 globals_init();
 
@@ -12,34 +14,63 @@ if nargin <= 0
     csi_sample = generate_simulation();
 end
 
-
+disp(csi_sample);
 global ITERATION L
 
 % parameters: ITERATION+1 cell, inside each cell is a struct 
 % (alpha, phi, tau)
 parameters = cell(ITERATION+1, 1);
+
 for i = 1:ITERATION+1
     parameters{i} = struct('alpha', zeros(1, L), ...
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
 
-parameters{1} = init(csi_sample, parameters{1});
+%for i = 1:ITERATION+1
+%    parameters{i} = struct('alpha', ones(1, L), ...
+%    'phi', zeros(1, L), 'tau', zeros(1, L));
+%end
 
+%var = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
+%parameters{1}.phi = var;
+parameters{1} = init1(csi_sample, parameters{1});
 
 %% Iterating;
-for i = 1:ITERATION
+for I = 1:ITERATION
     
     % Expectation step (E-step)
-    X = eStep(parameters{i}, csi_sample);
-    
+    X = eStep(parameters{I}, csi_sample);
     % Maximization step (M-step)
-    parameters{i+1}.tau = opt_tau(parameters{i}.phi, X);
-    parameters{i+1}.phi = opt_phi(parameters{i+1}.tau, X);
-    parameters{i+1}.alpha = compute_alpha(parameters{i+1}.tau,... 
-        parameters{i+1}.phi, X);
+    parameters{I+1}.tau = opt_tau(parameters{I}.phi, X);
+    parameters{I+1}.phi = opt_phi(parameters{I+1}.tau, X);
+%     parameters{I+1}.alpha = compute_alpha(parameters{I+1}.tau,... 
+%         parameters{I+1}.phi, X);
+    
+    
+%     alpha = parameters{I+1}.alpha;
+%     alpha = repmat(alpha,M,1);
+
+    phi = parameters{I+1}.phi;
+    phi = repmat(phi,M,1);
+
+    tau = parameters{I+1}.tau;
+    tau = repmat(tau,M,1);
+
+    C_M = repmat(transpose(0:M-1), 1, L);
+    C = exp(1j*2*pi/LAMBDA*D*C_M.*cos(phi));
+
+    S = sum(C.*exp(-1j*2*pi*tau*FREQUENCY),2);
+    disp(csi_sample-S);
 end
 
 ret_parameter = parameters{ITERATION+1};
+
+% H = [];
+% for G = 1:101  
+%     H = [H;parameters{G}.tau];
+% end
+% plot(H);
+
 end
 
 function ret_tau = opt_tau(phi, X)
@@ -51,9 +82,9 @@ for i = 1:DOMAIN_TAU.length
     tau_space(i,:) = compute_Z(zeros(1, L)+DOMAIN_TAU.step*(i-1)...
         +DOMAIN_TAU.start, phi, X);
 end
+
 [~, I] = max(abs(tau_space));
 ret_tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
-
 end
 
 
@@ -68,14 +99,13 @@ for i = 1:DOMAIN_PHI.length
 end
 [~, I] = max(abs(phi_space));
 ret_phi = DOMAIN_PHI.step*(I-1)+DOMAIN_PHI.start;
-
 end
 
 function ret_alpha = compute_alpha(tau, phi, X)
 
 global M N 
 
-ret_alpha = 1/(M*N)*abs(compute_Z(tau, phi, X));
+ret_alpha = 1/(M*N)*(compute_Z(tau, phi, X));
 
 end
 
@@ -83,13 +113,15 @@ end
 function csi_sample = generate_simulation()
     global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
     C = compute_C(SIMULATION_PHI);
-    ALPHA = 1./(SPEED_OF_LIGHT*SIMULATION_TAU);
+    ALPHA = 1./(SPEED_OF_LIGHT*SIMULATION_TAU).^2;
+    %ALPHA = [1,0.8];
+    %disp(ALPHA);
     csi_sample = repmat(ALPHA, M, 1) .* C .* ...
         repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
     csi_sample = sum(csi_sample, 2);
     
     
-
+    %csi_sample = [-0.57 + 0.77; 0.11 - 1.65i; 1.43 - 0.65i];
 
 end
 
@@ -106,24 +138,26 @@ function globals_init
     % N: # of sample
     global FREQUENCY SPEED_OF_LIGHT LAMBDA M L D ITERATION N DOMAIN_TAU ...
         DOMAIN_PHI
-    FREQUENCY = 5.2e9;  %unit hz
+    FREQUENCY = 5.24e9;  %unit hz
     SPEED_OF_LIGHT = 3e8;  %unit m/s
     LAMBDA = SPEED_OF_LIGHT/FREQUENCY;
     M = 3;
     L = 8;
     D = LAMBDA/2;
-    ITERATION = 999;
+    ITERATION = 100;
     N = 1;
-    DOMAIN_TAU = struct('start', 5e-9, 'end', 35e-9, 'step', 1e-9); % unit: s
+    DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);
     
-    DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/30); % unit: radius
+    DOMAIN_PHI = struct('start', 0, 'end', pi, 'step', pi/100); % unit: radius
     DOMAIN_PHI.length = round((DOMAIN_PHI.end - DOMAIN_PHI.start) ...
         / DOMAIN_PHI.step + 1);
     
     %% simulation
     global SIMULATION_TAU SIMULATION_PHI
+    %SIMULATION_TAU = [0, 1.1]*1e-9;
+    %SIMULATION_PHI = [1/18,1/9]*pi;
     SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
     SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
    

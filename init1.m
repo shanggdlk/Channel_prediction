@@ -11,16 +11,13 @@ for K = 1:L
     tau = parameter.tau;
     tau = repmat(tau,M,1);
     
-    alpha = parameter.alpha;
-    alpha = repmat(alpha,M,1);
-    
     C_M = repmat(transpose(0:M-1), 1, L);
     
     C_L = cos(phi);
     
     C = exp(1j*2*pi/LAMBDA*D*C_M.*C_L);    
     
-    S_matrix = alpha.* C .* exp(-1j*2*pi*FREQUENCY*tau);
+    S_matrix = C .* exp(-1j*2*pi*FREQUENCY*tau);
     
     X_k = csi - sum(S_matrix,2) + S_matrix(:,K);
     %% init tau
@@ -55,15 +52,15 @@ for K = 1:L
     parameter.phi(K) = opt_phi;
     
     %% init alpha
-    opt_tau = repmat(opt_tau,M,1);
-    opt_phi = repmat(opt_phi,M,1);
-    C_M = transpose(0:M-1);
-    C = exp(1j*2*pi/LAMBDA*D*C_M.*cos(opt_phi));
-    C = transpose(ctranspose(C));
-    %disp(size(C));
-    Z = sum(C .* X_k .* exp(1j*2*pi*FREQUENCY*opt_tau),1);
-    alpha = 1/(M*N)*(Z);
-    parameter.alpha(K) = alpha;
+%     opt_tau = repmat(opt_tau,M,1);
+%     opt_phi = repmat(opt_phi,M,1);
+%     C_M = transpose(0:M-1);
+%     C = exp(1j*2*pi/LAMBDA*D*C_M.*cos(opt_phi));
+%     C = transpose(ctranspose(C));
+%     %disp(size(C));
+%     Z = sum(C .* X_k .* exp(1j*2*pi*FREQUENCY*opt_tau),1);
+%     alpha = 1/(M*N)*(Z);
+%     parameter.alpha(K) = alpha;
 end
 
 %disp(parameter.alpha);
