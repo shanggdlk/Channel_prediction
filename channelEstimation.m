@@ -26,6 +26,7 @@ for i = 1:ITERATION+1
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
 
+<<<<<<< HEAD
 %for i = 1:ITERATION+1
 %    parameters{i} = struct('alpha', ones(1, L), ...
 %    'phi', zeros(1, L), 'tau', zeros(1, L));
@@ -33,14 +34,19 @@ end
 
 %var = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
 %parameters{1}.phi = var;
+=======
+>>>>>>> 4507a2069eeedf937fbc64f2742b032f65c6c57d
 parameters{1} = init1(csi_sample, parameters{1});
 
+% debug
+tmps = zeros(ITERATION,  L);
 %% Iterating;
 for I = 1:ITERATION
     
     % Expectation step (E-step)
     X = eStep(parameters{I}, csi_sample);
     % Maximization step (M-step)
+<<<<<<< HEAD
     parameters{I+1}.tau = opt_tau(parameters{I}.phi, X);
     parameters{I+1}.phi = opt_phi(parameters{I+1}.tau, X);
 %     parameters{I+1}.alpha = compute_alpha(parameters{I+1}.tau,... 
@@ -61,6 +67,17 @@ for I = 1:ITERATION
 
     S = sum(C.*exp(-1j*2*pi*tau*FREQUENCY),2);
     disp(csi_sample-S);
+=======
+    parameters{i+1}.tau = opt_tau(parameters{i}.phi, X);
+    parameters{i+1}.phi = opt_phi(parameters{i+1}.tau, X);
+    parameters{i+1}.alpha = compute_alpha(parameters{i+1}.tau,... 
+        parameters{i+1}.phi, X);
+    
+    %debug
+%     disp(parameters{i+1}.alpha);
+%     tmp_alphas(i) = parameters{i+1}.alpha(1);
+    tmps(i, :) = abs(compute_Z(parameters{i+1}.tau, parameters{i+1}.phi, X));
+>>>>>>> 4507a2069eeedf937fbc64f2742b032f65c6c57d
 end
 
 ret_parameter = parameters{ITERATION+1};
@@ -105,7 +122,11 @@ function ret_alpha = compute_alpha(tau, phi, X)
 
 global M N 
 
+<<<<<<< HEAD
 ret_alpha = 1/(M*N)*(compute_Z(tau, phi, X));
+=======
+ret_alpha = 1/(M*N)*compute_Z(tau, phi, X);
+>>>>>>> 4507a2069eeedf937fbc64f2742b032f65c6c57d
 
 end
 
@@ -113,9 +134,13 @@ end
 function csi_sample = generate_simulation()
     global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
     C = compute_C(SIMULATION_PHI);
+<<<<<<< HEAD
     ALPHA = 1./(SPEED_OF_LIGHT*SIMULATION_TAU).^2;
     %ALPHA = [1,0.8];
     %disp(ALPHA);
+=======
+    ALPHA = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
+>>>>>>> 4507a2069eeedf937fbc64f2742b032f65c6c57d
     csi_sample = repmat(ALPHA, M, 1) .* C .* ...
         repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
     csi_sample = sum(csi_sample, 2);

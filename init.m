@@ -94,4 +94,10 @@ end
 % %% init alpha
 % parameter.alpha = 1/(M*N)*abs(compute_Z(parameter.tau, parameter.phi, X));
 
+<<<<<<< HEAD
+=======
+%% init alpha
+parameter.alpha = 1/(M*N)*compute_Z(parameter.tau, parameter.phi, X);
+        
+>>>>>>> 4507a2069eeedf937fbc64f2742b032f65c6c57d
 end
