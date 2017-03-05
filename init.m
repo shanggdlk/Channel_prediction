@@ -92,7 +92,4 @@ end
 % 
 % 
 
-%% init alpha
-% parameter.alpha = 1/(M*N)*compute_Z(parameter.tau, parameter.phi, X);
-        
 end
