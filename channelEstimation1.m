@@ -14,7 +14,7 @@ end
 
 disp(csi_sample);
 
-global ITERATION L
+global ITERATION L SIMULATION_PHI SIMULATION_TAU
 
 % parameters: ITERATION+1 cell, inside each cell is a struct 
 % (alpha, phi, tau)
@@ -25,8 +25,10 @@ for i = 1:ITERATION+1
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
 
-parameters{1} = init1(csi_sample, parameters{1});
-
+% parameters{1} = init1(csi_sample, parameters{1});
+parameters{1}.tau = SIMULATION_TAU;
+parameters{1}.phi = SIMULATION_PHI;
+parameters{1}.alpha = ;
 
 %% Iterating;
 for I = 1:ITERATION
@@ -158,7 +160,7 @@ end
 function csi_sample = generate_simulation()
     global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
     C = compute_C(SIMULATION_PHI);
-    ALPHA = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU).^2;
+    ALPHA = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
     csi_sample = repmat(ALPHA, M, 1) .* C .* ...
         repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
     csi_sample = sum(csi_sample, 2);
