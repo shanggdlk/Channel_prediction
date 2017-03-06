@@ -24,13 +24,13 @@ for i = 1:ITERATION+1
     parameters{i} = struct('alpha', zeros(1, L), ...
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
-parameters{1}.tau = zeros(1, L)+...
-    DOMAIN_TAU.start+DOMAIN_TAU.step*round(DOMAIN_TAU.length/2);
-% parameters{1} = init1(csi_sample, parameters{1});
+% parameters{1}.tau = zeros(1, L)+...
+%     DOMAIN_TAU.start+DOMAIN_TAU.step*round(DOMAIN_TAU.length/2);
+parameters{1} = init(csi_sample, parameters{1});
 % groundtruth as input
-parameters{1}.tau = SIMULATION_TAU;
-parameters{1}.phi = SIMULATION_PHI;
-parameters{1}.alpha = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
+% parameters{1}.tau = SIMULATION_TAU;
+% parameters{1}.phi = SIMULATION_PHI;
+% parameters{1}.alpha = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
 
 %% Iterating
 for I = 1:ITERATION
@@ -106,7 +106,7 @@ function globals_init
     FREQUENCY = 5.24e9;  %unit hz
     SPEED_OF_LIGHT = 3e8;  %unit m/s
     LAMBDA = SPEED_OF_LIGHT/FREQUENCY;
-    M = 6;
+    M = 30;
     L = 8;
     D = LAMBDA/2;
     ITERATION = 800;
