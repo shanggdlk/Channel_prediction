@@ -14,7 +14,7 @@ end
 
 disp(csi_sample);
 
-global ITERATION L SIMULATION_PHI SIMULATION_TAU
+global ITERATION L SIMULATION_PHI SIMULATION_TAU SPEED_OF_LIGHT
 
 % parameters: ITERATION+1 cell, inside each cell is a struct 
 % (alpha, phi, tau)
@@ -28,7 +28,7 @@ end
 % parameters{1} = init1(csi_sample, parameters{1});
 parameters{1}.tau = SIMULATION_TAU;
 parameters{1}.phi = SIMULATION_PHI;
-parameters{1}.alpha = ;
+parameters{1}.alpha = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
 
 %% Iterating;
 for I = 1:ITERATION
