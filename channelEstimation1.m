@@ -25,9 +25,6 @@ for i = 1:ITERATION+1
     'phi', zeros(1, L), 'tau', zeros(1, L));
 end
 
-%var = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
-%parameters{1}.phi = var;
-
 parameters{1} = init1(csi_sample, parameters{1});
 
 
@@ -90,7 +87,7 @@ X = repmat(X,1,DOMAIN_TAU.length);
 
 tau_space = repmat((DOMAIN_TAU.start:DOMAIN_TAU.step:DOMAIN_TAU.end),M,1);
 
-Z_abs = abs(sum(C .* X .* exp(1j*2*pi*FREQUENCY.*tau_space),1));
+Z_abs = real(sum(C .* X .* exp(1j*2*pi*FREQUENCY.*tau_space),1));
 [~, I] = max(Z_abs);
 
 ret_tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
@@ -161,9 +158,7 @@ end
 function csi_sample = generate_simulation()
     global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
     C = compute_C(SIMULATION_PHI);
-    ALPHA = 1./(SPEED_OF_LIGHT*SIMULATION_TAU).^2;
-    %ALPHA = [1,0.8];
-    %disp(ALPHA);
+    ALPHA = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU).^2;
     csi_sample = repmat(ALPHA, M, 1) .* C .* ...
         repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
     csi_sample = sum(csi_sample, 2);

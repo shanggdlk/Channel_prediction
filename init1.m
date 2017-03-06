@@ -48,7 +48,7 @@ for K = 1:L
     
     opt_tau_matrix = repmat(opt_tau, M, DOMAIN_PHI.length);
     Z = sum(C .* repmat(X_k, 1, DOMAIN_PHI.length) .* exp(1j*2*pi*FREQUENCY*opt_tau_matrix),1);
-    Z_val = abs(Z);
+    Z_val = abs(Z)
     I=find(Z_val==max(Z_val));
     I = I(1);
     opt_phi = DOMAIN_PHI.step*(I-1)+DOMAIN_PHI.start;
