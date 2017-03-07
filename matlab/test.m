@@ -1,4 +1,4 @@
-my_dir = '/Users/Longfei/Desktop/SAGE algorithm/csi5g1/';
+my_dir = '/Users/zhenyus/github/Channel_prediction/csi5g1/';
 prefix_T1 = 'csi_';
 D = dir([my_dir,'*.log']);
 fnum =size(D,1);                       

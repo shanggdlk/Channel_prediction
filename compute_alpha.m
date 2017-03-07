@@ -1,15 +1,14 @@
 function ret_alpha = compute_alpha(tau, phi, X)
 
-global M N LAMBDA D FREQUENCY
+global M F FREQUENCIES L
 
-C_M = transpose(0:M-1);
-phi_space = repmat(phi,M,1);
-C_L = cos(phi_space);
-C = exp(1j*2*pi/LAMBDA*D*C_M.*C_L);
-C = ctranspose(C);
+C = compute_C(repmat(phi, 1,L));
+C = squeeze(conj(C(:, 1, :)));
 
+Z_FREQUENCY = repmat(FREQUENCIES, M, 1);
+Z_TAU = repmat(tau,M, F);
 
-Z = sum(C * X * exp(1j*2*pi*FREQUENCY*tau),1);
-ret_alpha = 1/(M*N)*Z;
+Z = sum(sum(C .* X .* exp(1j*2*pi.*Z_FREQUENCY.*Z_TAU),1),2);
+ret_alpha = 1/(M*F)*Z;
 
 end
