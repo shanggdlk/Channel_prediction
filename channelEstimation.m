@@ -36,14 +36,13 @@ parameters{1} = init(csi_sample, parameters{1});
 for I = 1:ITERATION
     for K = 1:L
     % Expectation step (E-step)
-    X = eStep(parameters{I}, csi_sample);
+    X = eStep(parameters{I}, csi_sample, K);
 
     % Maximization step (M-step)
-    parameters{I+1}.tau(K) = opt_tau(parameters{I}.alpha(K),... 
-        parameters{I}.phi(K), X(:,K));
-    parameters{I+1}.phi(K) = opt_phi(X(:,K));
+    parameters{I+1}.tau(K) = opt_tau(parameters{I}.phi(K), X);
+    parameters{I+1}.phi(K) = opt_phi(parameters{I+1}.tau(K), X);
     parameters{I+1}.alpha(K) = compute_alpha(parameters{I+1}.tau(K),...
-        parameters{I+1}.phi(K), X(:,K));
+        parameters{I+1}.phi(K), X);
     end
 
     %% compute expectation
@@ -77,17 +76,14 @@ end
 
 
 function [csi_sample,csi_hidden] = generate_simulation()
-    global SIMULATION_TAU SIMULATION_PHI SPEED_OF_LIGHT M FREQUENCY
+    global SIMULATION_TAU SIMULATION_PHI L SPEED_OF_LIGHT M FREQUENCIES F
     C = compute_C(SIMULATION_PHI);
-    ALPHA = (1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU);
-    csi_sample = repmat(ALPHA, M, 1) .* C .* ...
-        repmat(exp(-1j*2*pi*SIMULATION_TAU*FREQUENCY), M, 1);
+    ALPHA = repmat((1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU), M, 1, F);
+    CSI_TAU = repmat(SIMULATION_TAU, M, 1, F);
+    CSI_FREQUENCY = repmat(reshape(FREQUENCIES, [1,1,F]), M, L);
+    csi_sample = ALPHA .* C .* exp(-1j*2*pi.*CSI_TAU.*CSI_FREQUENCY);
     csi_hidden = csi_sample;
-    csi_sample = sum(csi_sample, 2);
-    
-    
-    %csi_sample = [-0.57 + 0.77; 0.11 - 1.65i; 1.43 - 0.65i];
-
+    csi_sample = squeeze(sum(csi_sample, 2));
 end
 
 
@@ -95,22 +91,27 @@ end
 
 function globals_init
 %% physical
-% labmda: wavelength of the signal;
-% freq: frequency of the signal;
+% LAMBDA: wavelength of the signal;
+% FREQUENCY: frequency of the signal;
 % M: antenna array size;
-% L is the number of propagation paths;
-% D is spacing between adjacent antennas of the receiver antenna array;
-% N: # of sample
-    global FREQUENCY SPEED_OF_LIGHT LAMBDA M L D ITERATION N DOMAIN_TAU ...
-        DOMAIN_PHI
-    FREQUENCY = 5.24e9;  %unit hz
+% L: # propagation paths;
+% D: spacing between adjacent rx antenna
+% N: # sample
+% F: # measured subcarrier
+% DELTA_FREQUENCY: difference between adjacent subcarrier
+    global CENTRAL_FREQUENCY SPEED_OF_LIGHT M L D ITERATION DOMAIN_TAU ...
+        DOMAIN_PHI F DELTA_FREQUENCY FREQUENCIES LAMBDAS
+    CENTRAL_FREQUENCY = 5.2e9;  %unit hz
+    DELTA_FREQUENCY = 20e6/64; % 20Mhz, 64 slots
+    F = 56;
+    FREQUENCIES = ((1:F) - (F+1)/2) * DELTA_FREQUENCY+CENTRAL_FREQUENCY;
+    LAMBDAS = SPEED_OF_LIGHT./FREQUENCIES;
+    
     SPEED_OF_LIGHT = 3e8;  %unit m/s
-    LAMBDA = SPEED_OF_LIGHT/FREQUENCY;
-    M = 30;
+    M = 20;
     L = 8;
-    D = LAMBDA/2;
+    D = mean(LAMBDAS)/2;
     ITERATION = 800;
-    N = 1;
     DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);
@@ -121,8 +122,6 @@ function globals_init
     
     %% simulation
     global SIMULATION_TAU SIMULATION_PHI
-    %SIMULATION_TAU = [0, 1.1]*1e-9;
-    %SIMULATION_PHI = [1/18,1/9]*pi;
     SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
     SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
    
