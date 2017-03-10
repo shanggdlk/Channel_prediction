@@ -15,13 +15,16 @@ for K = 1:L
     S_matrix = alpha.* C .* exp(-1j*2*pi.*S_FREQUENCY.*S_TAU);
     
     X_k = csi - squeeze(sum(S_matrix,2)) + squeeze(S_matrix(:,K,:));
-    % TODO init tau
     
+    % TODO init tau
+    parameter.tau(K) = init_tau(X_k);
+    disp(parameter.tau);
     % init phi
     parameter.phi(K) = opt_phi(parameter.tau(K), X_k);
-    
+    disp(parameter.phi);    
     % init alpha
     parameter.alpha(K) = compute_alpha(parameter.tau(K), parameter.phi(K), X_k);
+    disp(parameter.alpha);
 end
 
 %disp(parameter.alpha);

@@ -43,6 +43,9 @@ for I = 1:ITERATION
     parameters{I+1}.phi(K) = opt_phi(parameters{I+1}.tau(K), X);
     parameters{I+1}.alpha(K) = compute_alpha(parameters{I+1}.tau(K),...
         parameters{I+1}.phi(K), X);
+    parameters{I}.tau(K) = parameters{I+1}.tau(K);
+    parameters{I}.phi(K) = parameters{I+1}.phi(K);
+    parameters{I}.alpha(K) = parameters{I+1}.alpha(K);
     end
 
     %% compute expectation
@@ -108,10 +111,10 @@ function globals_init
     LAMBDAS = SPEED_OF_LIGHT./FREQUENCIES;
     
     SPEED_OF_LIGHT = 3e8;  %unit m/s
-    M = 20;
-    L = 8;
+    M = 6;
+    L = 4;
     D = mean(LAMBDAS)/2;
-    ITERATION = 800;
+    ITERATION = 200;
     DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);
@@ -122,7 +125,9 @@ function globals_init
     
     %% simulation
     global SIMULATION_TAU SIMULATION_PHI
-    SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
-    SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
+    %SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
+    %SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
+    SIMULATION_TAU = [12 13 15 17]*1e-9;
+    SIMULATION_PHI = [0.1 0.3 0.4 0.6]*pi;
    
 end
