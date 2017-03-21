@@ -16,7 +16,7 @@ function globals_init
     F = 56;
     FREQUENCIES = ((1:F) - (F+1)/2) * DELTA_FREQUENCY+CENTRAL_FREQUENCY;
     LAMBDAS = SPEED_OF_LIGHT./FREQUENCIES;
-    M = 20;
+    M = 10;
     L = 8;
     D = mean(LAMBDAS)/2;
     ITERATION = 800;
