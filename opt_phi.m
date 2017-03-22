@@ -12,7 +12,7 @@ C = conj(C);
 
 X = repmat(reshape(X,[M,1,F]),1,DOMAIN_PHI.length, 1);
 
-Z_FREQUENCY = repmat(reshape(FREQUENCIES, [1,1,F]), M, DOMAIN_PHI.length);
+Z_FREQUENCY = repmat(reshape(FREQUENCIES, [1,1,F]), M, DOMAIN_PHI.length, 1);
 Z_TAU = repmat(tau,M,DOMAIN_PHI.length, F);
 Z_abs = abs(squeeze(sum(sum(C .* X .* ...
     exp(1j*2*pi.*Z_FREQUENCY.*Z_TAU),1), 3)));

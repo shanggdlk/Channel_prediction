@@ -16,20 +16,18 @@ for K = 1:L
     
     X_k = csi - squeeze(sum(S_matrix,2)) + squeeze(S_matrix(:,K,:));
     
-    % TODO init tau
+    % init tau
     parameter.tau(K) = init_tau(X_k);
-    disp(parameter.tau);
+
     % init phi
     parameter.phi(K) = opt_phi(parameter.tau(K), X_k);
-    disp(parameter.phi);    
+   
     % init alpha
     parameter.alpha(K) = compute_alpha(parameter.tau(K), parameter.phi(K), X_k);
-    disp(parameter.alpha);
 end
 
-%disp(parameter.alpha);
-%disp(parameter.phi);
-%disp(parameter.tau);
+% disp(parameter.alpha);
+% disp(parameter.phi);
 
 %% testing whether the initialization works correctly.
 % alpha = parameter.alpha;

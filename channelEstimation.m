@@ -43,6 +43,7 @@ for I = 1:ITERATION
     parameters{I+1}.phi(K) = opt_phi(parameters{I+1}.tau(K), X);
     parameters{I+1}.alpha(K) = compute_alpha(parameters{I+1}.tau(K),...
         parameters{I+1}.phi(K), X);
+    
     parameters{I}.tau(K) = parameters{I+1}.tau(K);
     parameters{I}.phi(K) = parameters{I+1}.phi(K);
     parameters{I}.alpha(K) = parameters{I+1}.alpha(K);
@@ -65,7 +66,25 @@ for I = 1:ITERATION
     %disp(csi_sample-S);
 end
 
-ret_parameter = parameters{ITERATION+1};
+ret_parameter = parameters{ITERATION};
+disp(ret_parameter.tau);
+disp(ret_parameter.phi);
+%disp(ret_parameter.alpha);
+disp(SIMULATION_TAU);
+disp(SIMULATION_PHI);
+
+h = zeros(4,ITERATION);
+for i = 1:ITERATION
+    h(:,i) = parameters{i}.phi;
+end
+
+% plot(h(1,:));
+% hold on;
+% plot(h(2,:));
+% plot(h(3,:));
+% plot(h(4,:));
+% hold off;
+
 
 % H = [];
 % for G = 1:ITERATION/L  
@@ -106,15 +125,16 @@ function globals_init
         DOMAIN_PHI F DELTA_FREQUENCY FREQUENCIES LAMBDAS
     CENTRAL_FREQUENCY = 5.2e9;  %unit hz
     DELTA_FREQUENCY = 20e6/64; % 20Mhz, 64 slots
-    F = 56;
+    F = 56;    
+    SPEED_OF_LIGHT = 3e8;  %unit m/s
+    
     FREQUENCIES = ((1:F) - (F+1)/2) * DELTA_FREQUENCY+CENTRAL_FREQUENCY;
     LAMBDAS = SPEED_OF_LIGHT./FREQUENCIES;
-    
-    SPEED_OF_LIGHT = 3e8;  %unit m/s
-    M = 6;
+
+    M = 16;
     L = 4;
     D = mean(LAMBDAS)/2;
-    ITERATION = 200;
+    ITERATION = 50;
     DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);

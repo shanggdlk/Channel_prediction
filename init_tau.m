@@ -4,7 +4,7 @@ global DOMAIN_TAU M FREQUENCIES F
 
 X = repmat(reshape(X, [M, 1, F]),1,DOMAIN_TAU.length, 1);
 
-FREQUENCY_matrix = repmat(reshape(FREQUENCIES, [1,1,F]), M, DOMAIN_TAU.length);
+FREQUENCY_matrix = repmat(reshape(FREQUENCIES, [1,1,F]), M, DOMAIN_TAU.length, 1);
 TAU_matrix = repmat(DOMAIN_TAU.start:DOMAIN_TAU.step:DOMAIN_TAU.end,...
     M,1, F);
 
