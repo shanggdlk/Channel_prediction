@@ -1,4 +1,4 @@
-function [parameters,ret_parameter] = channelEstimation(csi_sample)
+function channelEstimation(csi_sample)
 %% csi_sample: M*1 complex
 % theta is a L*3 vector: [alpha, phi, tau] 
 % [alpha, -, -]_l: the amplitude of the path l;
@@ -14,7 +14,8 @@ end
 
 % disp(csi_sample);
 
-global ITERATION L DOMAIN_TAU SIMULATION_PHI SIMULATION_TAU SPEED_OF_LIGHT...
+global ITERATION L SIMULATION_PHI SIMULATION_TAU ALPHA ...
+ EPSILON
     
 % parameters: ITERATION+1 cell, inside each cell is a struct 
 % (alpha, phi, tau)
@@ -43,6 +44,10 @@ for I = 1:ITERATION
     parameters{I+1}.phi(K) = opt_phi(parameters{I+1}.tau(K), X);
     parameters{I+1}.alpha(K) = compute_alpha(parameters{I+1}.tau(K),...
         parameters{I+1}.phi(K), X);
+    
+    parameters{I}.tau(K) = parameters{I+1}.tau(K);
+    parameters{I}.phi(K) = parameters{I+1}.phi(K);
+    parameters{I}.alpha(K) = parameters{I+1}.alpha(K);
     end
 
     %% compute expectation
@@ -62,7 +67,37 @@ for I = 1:ITERATION
     %disp(csi_sample-S);
 end
 
-ret_parameter = parameters{ITERATION+1};
+ret_parameter = parameters{ITERATION};
+if all((ret_parameter.tau - SIMULATION_TAU).^2 < EPSILON)
+    fprintf('predicting tau success\n');
+else
+    error('predicting tau fail\n')
+end
+
+if all((ret_parameter.phi - SIMULATION_PHI).^2 < EPSILON)
+    fprintf('predicting phi success\n');
+else
+    error('predicting phi fail\n')
+end
+
+if all((ret_parameter.alpha - ALPHA).^2 < EPSILON)
+    fprintf('predicting alpha success\n');
+else
+    error('predicting alpha fail\n')
+end
+
+% h = zeros(4,ITERATION);
+% for i = 1:ITERATION
+%     h(:,i) = parameters{i}.phi;
+% end
+
+% plot(h(1,:));
+% hold on;
+% plot(h(2,:));
+% plot(h(3,:));
+% plot(h(4,:));
+% hold off;
+
 
 % H = [];
 % for G = 1:ITERATION/L  
@@ -76,14 +111,19 @@ end
 
 
 function [csi_sample,csi_hidden] = generate_simulation()
-    global SIMULATION_TAU SIMULATION_PHI L SPEED_OF_LIGHT M FREQUENCIES F
+    global SIMULATION_TAU SIMULATION_PHI L SPEED_OF_LIGHT FREQUENCIES F ALPHA
     C = compute_C(SIMULATION_PHI);
-    ALPHA = repmat((1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU), M, 1, F);
-    CSI_TAU = repmat(SIMULATION_TAU, M, 1, F);
-    CSI_FREQUENCY = repmat(reshape(FREQUENCIES, [1,1,F]), M, L);
-    csi_sample = ALPHA .* C .* exp(-1j*2*pi.*CSI_TAU.*CSI_FREQUENCY);
+    ALPHA = reshape((1+1j)./(SPEED_OF_LIGHT*SIMULATION_TAU), [1, L, 1]);
+    CSI_TAU = reshape(SIMULATION_TAU, [1, L, 1]);
+    CSI_FREQUENCY = reshape(FREQUENCIES, [1,1,F]);
+    
+    
+    csi_sample = bsxfun(@times, ALPHA, bsxfun(@times, C, ...
+        exp(-1j*2*pi.*bsxfun(@times, CSI_TAU, CSI_FREQUENCY))));
+    
     csi_hidden = csi_sample;
     csi_sample = squeeze(sum(csi_sample, 2));
+    %disp(size(csi_sample));
 end
 
 
@@ -98,20 +138,30 @@ function globals_init
 % D: spacing between adjacent rx antenna
 % N: # sample
 % F: # measured subcarrier
+% matrix order: [M, L, F]
 % DELTA_FREQUENCY: difference between adjacent subcarrier
-    global CENTRAL_FREQUENCY SPEED_OF_LIGHT M L D ITERATION DOMAIN_TAU ...
-        DOMAIN_PHI F DELTA_FREQUENCY FREQUENCIES LAMBDAS
-    CENTRAL_FREQUENCY = 5.2e9;  %unit hz
-    DELTA_FREQUENCY = 20e6/64; % 20Mhz, 64 slots
-    F = 56;
+    global CENTRAL_FREQUENCY SPEED_OF_LIGHT SHAPE_M M L D ITERATION DOMAIN_TAU ...
+        DOMAIN_PHI F DELTA_FREQUENCY FREQUENCIES LAMBDAS EPSILON
+    CENTRAL_FREQUENCY = 2.462e9;  %unit hz
+ 
+    F = 64;   % # of frequency 
+    DELTA_FREQUENCY = 20e6/F; % 20Mhz, 64 slots
+  
+    SPEED_OF_LIGHT = 3e8;  %unit m/s
+    
     FREQUENCIES = ((1:F) - (F+1)/2) * DELTA_FREQUENCY+CENTRAL_FREQUENCY;
+    %disp(FREQUENCIES(1,2)-FREQUENCIES(1,1));
     LAMBDAS = SPEED_OF_LIGHT./FREQUENCIES;
     
-    SPEED_OF_LIGHT = 3e8;  %unit m/s
-    M = 20;
-    L = 8;
-    D = mean(LAMBDAS)/2;
-    ITERATION = 800;
+    %shape of the 2d antenna array, in this case, 2 row * 6 column
+    SHAPE_M = [2 6];
+    M = prod(SHAPE_M);
+    L = 2;
+    %D = mean(LAMBDAS)/2;
+    D = 0.031;
+    ITERATION = 50;
+    EPSILON = 0.1;  %required accuracy
+    % search space
     DOMAIN_TAU = struct('start', 10e-9, 'end', 30e-9, 'step', 1e-9); % unit: s
     DOMAIN_TAU.length = round((DOMAIN_TAU.end - DOMAIN_TAU.start) ...
         / DOMAIN_TAU.step + 1);
@@ -122,7 +172,10 @@ function globals_init
     
     %% simulation
     global SIMULATION_TAU SIMULATION_PHI
-    SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
-    SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
-   
+    %SIMULATION_TAU = [12 13 15 17 19 20 22 24]*1e-9;
+    %SIMULATION_PHI = [0.1 0.3 0.4 0.45 0.5 0.6 0.76 0.8]*pi;
+    %SIMULATION_TAU = [12 13 15 17]*1e-9;
+    %SIMULATION_PHI = [0.1 0.3 0.4 0.6]*pi;
+    SIMULATION_PHI = [0.1 0.3]*pi;
+    SIMULATION_TAU = [12 13]*1e-9;
 end

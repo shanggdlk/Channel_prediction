@@ -1,9 +1,15 @@
 function ret = compute_C(phi)
-%M * L * F
-global M L LAMBDAS D F
+%M * L * F, col major
+global LAMBDAS D F SHAPE_M M
 
-C_M = repmat(transpose(0:M-1), 1, L, F);
-C_L = repmat(cos(phi), M, 1, F);
-C_LAMBDA = repmat(reshape(LAMBDAS, [1,1,F]), M, L, 1);
-ret = exp(1j*2*pi./C_LAMBDA*D.*C_M.*C_L);
+
+phi = reshape(phi, [1, 1, numel(phi)]);
+C_M1 = reshape(0:SHAPE_M(1)-1, [SHAPE_M(1), 1]);
+C_M2 = reshape(0:SHAPE_M(2)-1, [1, SHAPE_M(2)]);
+
+C_ML = bsxfun(@plus, bsxfun(@times, C_M1, sin(phi)), bsxfun(@times, C_M2, cos(phi)));
+C_LAMBDA = reshape(LAMBDAS, [1,1,1,F]);
+ret = exp(1j*2*pi*D.*bsxfun(@rdivide, C_ML, C_LAMBDA));
+% compress M for one dimension
+ret = reshape(ret, [M, numel(phi), F]);
 end

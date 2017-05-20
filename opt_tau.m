@@ -3,20 +3,15 @@ function ret_tau = opt_tau(phi, X)
 global DOMAIN_TAU M FREQUENCIES L F
 
 % only need a slice of C
-C = compute_C(repmat(phi, 1, L));
-C = conj(C(:, 1, :));
+C = conj(compute_C(phi));
 
-C = repmat(C,1,DOMAIN_TAU.length, 1);
+X = reshape(X, [M, 1, F]);
 
-X = repmat(reshape(X, [M, 1, F]),1,DOMAIN_TAU.length, 1);
+Z_FREQUENCY = reshape(FREQUENCIES, [1,1,F]);
+Z_TAU = DOMAIN_TAU.start:DOMAIN_TAU.step:DOMAIN_TAU.end;
 
-Z_FREQUENCY = repmat(reshape(FREQUENCIES, [1,1,F]), M, DOMAIN_TAU.length);
-Z_TAU = repmat(DOMAIN_TAU.start:DOMAIN_TAU.step:DOMAIN_TAU.end,...
-    M,1, F);
-
-Z_abs = squeeze(abs(sum(sum(C.*X.*exp(1j*2*pi.*Z_FREQUENCY.*Z_TAU),1),3)));
+Z_abs = bsxfun(@times, C, bsxfun(@times, X, exp(1j*2*pi.*bsxfun(@times, Z_FREQUENCY, Z_TAU))));
+Z_abs = squeeze(sum(sum(Z_abs, 3), 1));
 [~, I] = max(Z_abs);
 
 ret_tau = DOMAIN_TAU.step*(I-1)+DOMAIN_TAU.start;
-
-end
